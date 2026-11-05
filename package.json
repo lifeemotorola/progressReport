@@ -4,7 +4,8 @@
   "description": "API for the Online Report Card application.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "prepare:container": "node scripts/prepare-container.cjs"
   },
   "dependencies": {
     "cors": "^2.8.5",
