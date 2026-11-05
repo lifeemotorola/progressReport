@@ -27,7 +27,7 @@ Connect the repository to the `progressreport` Worker. In **Settings → Build**
 - Deploy command: `npx wrangler deploy`
 - Root directory: the repository root (leave blank if that is the default).
 
-Save the settings and deploy the commit containing this change. The build command installs production dependencies into an ignored staging directory on Cloudflare's Linux x64 build host. `.node-version` selects Node 22 to match the Docker image. The Dockerfile copies those dependencies without running a command inside Docker, avoiding the `error mounting "proc" ... operation not permitted` failure seen in Workers Builds. If `NODE_VERSION` is set in build variables, remove it or set it to `22`; build-variable overrides take precedence. The fix still needs verification in your Cloudflare account.
+Save the settings and deploy the commit containing this change. The committed `.npmrc` enables the same legacy peer-dependency resolution used to create the lockfile, including for Cloudflare’s automatic `npm ci`. The build command installs production dependencies into an ignored staging directory on Cloudflare's Linux x64 build host. `.node-version` selects Node 22 to match the Docker image. The Dockerfile copies those dependencies without running a command inside Docker, avoiding the `error mounting "proc" ... operation not permitted` failure seen in Workers Builds. If `NODE_VERSION` is set in build variables, remove it or set it to `22`; build-variable overrides take precedence. The fix still needs verification in your Cloudflare account.
 
 ### Deploy locally instead
 
