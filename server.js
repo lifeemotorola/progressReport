@@ -13,7 +13,7 @@ const { GridFsStorage } = require('multer-gridfs-storage');
 // Define allowed super admin emails (Moved to top to prevent ReferenceErrors in routes)
 const SUPER_ADMINS = process.env.SUPER_ADMIN_EMAILS 
   ? process.env.SUPER_ADMIN_EMAILS.split(',').map(email => email.trim())
-  : ['theadmin@gmail.com', 'principal@school.com', 'your-email@example.com'];
+  : [];
 
 // --- Firebase Admin Setup ---
 // IMPORTANT: You must install firebase-admin (npm install firebase-admin)
@@ -25,7 +25,7 @@ try {
     // Debugging: Log the first few characters to verify content (without exposing secrets)
     const rawConfig = process.env.FIREBASE_SERVICE_ACCOUNT.trim();
     if (!rawConfig.startsWith('{')) {
-        console.error("ERROR: FIREBASE_SERVICE_ACCOUNT does not start with '{'. It starts with:", rawConfig.substring(0, 10));
+        console.error("ERROR: FIREBASE_SERVICE_ACCOUNT must be a JSON object.");
         throw new Error("FIREBASE_SERVICE_ACCOUNT environment variable is not a valid JSON string. Did you paste the email instead of the JSON content?");
     }
     serviceAccount = JSON.parse(rawConfig);
@@ -178,7 +178,15 @@ const transporter = nodemailer.createTransport({
 });
 
 // Serve static files (like index.html, style.css, script.js) from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve only known public assets: never expose environment files or server source.
+const publicFiles = new Set(['index.html', 'admin.html', 'student.html', 'student-list.html',
+  'superadmin.html', 'script.js', 'admin.js', 'style.css', 'logo.png',
+  'apple-touch-icon.png', 'favicon-96x96.png', 'favicon.ico', 'favicon.svg',
+  'site.webmanifest', 'web-app-manifest-192x192.png', 'web-app-manifest-512x512.png']);
+app.get('/:file', (req, res, next) => {
+  if (!publicFiles.has(req.params.file)) return next();
+  res.sendFile(path.join(__dirname, req.params.file));
+});
 
 // Convenience route: Redirect /admin to /admin.html
 app.get('/admin', (req, res) => {
