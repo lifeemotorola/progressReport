@@ -1,0 +1,8 @@
+{
+  "name": "progress-report-portal",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-11-05",
+  "containers": [{ "class_name": "ReportContainer", "image": "./Dockerfile", "max_instances": 1 }],
+  "durable_objects": { "bindings": [{ "name": "REPORT_CONTAINER", "class_name": "ReportContainer" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ReportContainer"] }]
+}
