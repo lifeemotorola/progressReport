@@ -17,13 +17,30 @@ Render environment variables cannot be reconstructed from this repository. Check
 
 ## Deploy to Cloudflare
 
-Cloudflare Containers require an eligible Workers plan and can incur charges; review Cloudflare's current pricing. You need Node.js 22+, Docker running locally, and access to your Cloudflare account. This deployment configuration is not yet tested against a live Cloudflare account.
+Cloudflare Containers require an eligible Workers plan and can incur charges; review Cloudflare's current pricing. This configuration is not yet tested against a live Cloudflare account.
+
+### Deploy using Cloudflare Workers Builds
+
+Connect the repository to the `progressreport` Worker. In **Settings → Build**, set:
+
+- Build command: `npm run prepare:container`
+- Deploy command: `npx wrangler deploy`
+- Root directory: the repository root (leave blank if that is the default).
+
+Save the settings and deploy the commit containing this change. The build command installs production dependencies into an ignored staging directory on Cloudflare's Linux x64 build host. `.node-version` selects Node 22 to match the Docker image. The Dockerfile copies those dependencies without running a command inside Docker, avoiding the `error mounting "proc" ... operation not permitted` failure seen in Workers Builds. If `NODE_VERSION` is set in build variables, remove it or set it to `22`; build-variable overrides take precedence. The fix still needs verification in your Cloudflare account.
+
+### Deploy locally instead
+
+On Linux x64 with Node.js 22, a running Docker daemon and access to your Cloudflare account:
 
 ```sh
 npm install --legacy-peer-deps
+npm run prepare:container
 npx wrangler login
 npx wrangler deploy
 ```
+
+The staging step must run before every Docker build, and is intentionally restricted to Linux x64 with Node 22 so dependencies match the image. A macOS, Windows, or ARM host should use Cloudflare Workers Builds or prepare the build in a matching Linux x64 environment instead.
 
 Set each value via Cloudflare's Worker settings as a secret, or use `npx wrangler secret put NAME` and enter the value securely when prompted. Never place real secrets in `wrangler.jsonc`, source files, or shell history. `FIREBASE_SERVICE_ACCOUNT` must be the complete JSON object, including its private key; when entering it via the CLI use compact single-line JSON. Configure the following names:
 

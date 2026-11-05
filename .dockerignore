@@ -1,5 +1,7 @@
 .git
-node_modules
+/node_modules
+.container-deps/package.json
+.container-deps/package-lock.json
 .env*
 .dev.vars*
 serviceAccountKey.json
